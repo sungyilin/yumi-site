@@ -3,23 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>盈賦科技股份有限公司</title>
-<meta name="description" content="盈賦科技股份有限公司 —— 羽球約球社群 App「Yumi」的開發與營運團隊。">
+<title>Yumi — 羽球約球社群</title>
+<meta name="description" content="Yumi 是一款羽球約球社群 App：找附近的球局、開團揪人、線上報名與現場報到。盈賦科技股份有限公司出品。">
 <!--
-  這一頁是公司首頁，Google Play 的組織帳號驗證會看它。
+  這一頁是 **Yumi 的產品頁**，掛在 yumi.influenceai.tw。
+  公司官網是 influenceai.tw（InfluenceAI 那個產品），兩邊各司其職 ——
+  所以這裡主打 App 本身，公司資訊放頁尾（Google Play 的組織驗證
+  仍然看得到公司全名、地址與聯絡方式）。
 
   **樣式刻意寫在這一頁裡面，不連結 style.css。**
-  隔壁兩頁（隱私權政策、支援）共用 style.css 是因為它們一起被搬到
-  網站上；這一頁如果因為少了一個 CSS 檔就變成裸 HTML，審核員看到的
-  就是一個壞掉的公司官網 —— 一個檔案自己站得住，比省幾行重複重要。
+  隔壁兩頁（隱私權政策、支援）共用 style.css；這一頁如果因為少了
+  一個 CSS 檔就變成裸 HTML，審核員與使用者看到的就是一個壞掉的
+  網站 —— 一個檔案自己站得住，比省幾行重複重要。
 
-  公司名稱與地址**要跟 D-U-N-S 登記的一字不差**（含有沒有空格）。
-  要改的話兩邊一起改，不要只改這裡。
+  公司名稱與地址**要跟 D-U-N-S 登記的一字不差**。要改的話，
+  Play Console 與這裡一起改，不要只改一邊。
 -->
 <style>
 :root{
   --bg:#F7F7F5; --card:#FFF; --ink:#14242D; --soft:#5A6B73;
-  --line:rgba(20,36,45,.10); --lime:#527D14;
+  --line:rgba(20,36,45,.10); --lime:#527D14; --limebg:#BEEA5E;
 }
 @media (prefers-color-scheme: dark){
   :root{ --bg:#0C1418; --card:#18272E; --ink:#F5F7F2; --soft:#9BAAB2;
@@ -30,16 +33,26 @@ body{
   background:var(--bg); color:var(--ink); line-height:1.75;
   font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",
               "Microsoft JhengHei",sans-serif;
-  padding:32px 20px 80px;
 }
-main{max-width:720px; margin:0 auto}
-h1{font-size:28px; letter-spacing:-.5px; margin-bottom:6px}
-.updated{color:var(--soft); font-size:14px; margin-bottom:28px}
+main{max-width:720px; margin:0 auto; padding:0 20px 80px}
+
+/* 頁首那條螢光綠 —— App 的主色，一眼認得出是同一個品牌 */
+.hero{
+  background:linear-gradient(160deg,#BEEA5E 0%,#A8D957 100%);
+  padding:56px 20px 48px; text-align:center; margin-bottom:40px;
+}
+.hero .name{
+  font-size:52px; font-weight:800; letter-spacing:-1px; color:#1B3A10;
+  line-height:1.1;
+}
+.hero .tag{ margin-top:14px; font-size:19px; font-weight:700; color:#1B3A10 }
+.hero .sub{ margin-top:8px; font-size:14px; color:#2C4A1C; opacity:.8 }
+
 h2{font-size:19px; margin:34px 0 10px}
 p,li{font-size:16px; color:var(--ink)}
 p{margin-bottom:12px}
 ul{margin:0 0 14px 22px}
-li{margin-bottom:6px}
+li{margin-bottom:8px}
 a{color:var(--lime)}
 .card{background:var(--card); border:1px solid var(--line); border-radius:16px;
       padding:18px 20px; margin:16px 0}
@@ -53,6 +66,7 @@ tr:last-child th,tr:last-child td{border-bottom:0}
 /* 手機上兩欄表格會被壓成「一個字一行」—— 那不是排版難看，是根本讀不了。
    窄螢幕就改成上下堆疊：標題一行、說明一行。 */
 @media (max-width:620px){
+  .hero .name{font-size:42px}
   table,tbody,tr,th,td{display:block; width:100%}
   tr{border-bottom:1px solid var(--line); padding:10px 0}
   tr:last-child{border-bottom:0; padding-bottom:0}
@@ -61,32 +75,44 @@ tr:last-child th,tr:last-child td{border-bottom:0}
   td{color:var(--soft)}
 }
 footer{margin-top:48px; padding-top:18px; border-top:1px solid var(--line);
-       color:var(--soft); font-size:14px}
+       color:var(--soft); font-size:14px; line-height:1.9}
 </style>
 </head>
 <body>
+
+<div class="hero">
+  <div class="name">Yumi</div>
+  <div class="tag">找到程度相近的球友，一起打球</div>
+  <div class="sub">找球局 ・ 開團揪人 ・ 現場報到</div>
+</div>
+
 <main>
 
-<h1>盈賦科技股份有限公司</h1>
-<p class="updated">羽球約球社群 App「Yumi」的開發與營運團隊</p>
+<h2>Yumi 是什麼</h2>
+<p>打球最大的門檻從來不是體力，而是「找不到人一起打」——場地訂好了、
+時間喬好了，卻湊不齊人；或者好不容易揪到人，程度差太多，雙方都打得不盡興。</p>
+<p>Yumi 是為羽球球友打造的約球社群 App，把想打球的人準確地接起來。</p>
 
-<h2>關於我們</h2>
-<p>盈賦科技股份有限公司位於高雄，專注於運動社群軟體的開發與營運。</p>
-<p>我們相信打球最大的門檻不是體力，而是「找不到人一起打」——
-場地有了、時間有了，卻湊不齊人；或者好不容易揪到人，程度卻差太多，
-雙方都打得不盡興。我們做的事，就是把想打球的人準確地接起來。</p>
-
-<h2>我們的產品：Yumi</h2>
-<p>Yumi 是一款羽球約球社群 App。球友可以在上面找到附近、程度相近的球局，
-線上報名、現場報到，打完之後互相評價。</p>
+<h2>主要功能</h2>
 <ul>
-<li><strong>找附近的球局</strong>——依距離或日期列出可以報名的場次</li>
-<li><strong>開團與名單管理</strong>——人數上限、候補名單、團長保留名額</li>
-<li><strong>現場報到</strong>——用 QR 完成點名，出席紀錄清楚可查</li>
-<li><strong>實力分級</strong>——1 到 18 級，一起打過球的人才能互相評分</li>
-<li><strong>球友社群</strong>——加好友、邀約打球</li>
+<li><strong>找附近的球局</strong>——依距離或日期列出可以報名的場次，一眼看到球館、時間、費用、還缺幾個人</li>
+<li><strong>開團揪人</strong>——設定日期、球館、面數、人數上限、用球與費用，支援候補名單與團長保留名額</li>
+<li><strong>現場報到</strong>——出示 QR 碼給團長掃描完成報到，出席紀錄清楚可查</li>
+<li><strong>實力分級</strong>——1 到 18 級，只有一起打過球、雙方都報到的人才能互相評分</li>
+<li><strong>球友社群</strong>——搜尋暱稱或用戶編號加好友、邀約打球</li>
+<li><strong>任務與獎勵</strong>——完成任務累積羽毛，兌換抵用券折抵球局費用</li>
 </ul>
+
+<h2>下載</h2>
 <p>iOS 版已於 App Store 上架，Android 版開發中。</p>
+
+<h2>隱私</h2>
+<ul>
+<li>沒有廣告，也沒有第三方追蹤</li>
+<li>你的位置不會離開手機——距離在裝置上計算，座標不會上傳</li>
+<li>可以隨時在 App 內自行刪除帳號與所有資料</li>
+</ul>
+<p><a href="privacy.html">完整的隱私權政策</a></p>
 
 <h2>聯絡我們</h2>
 <div class="card">
