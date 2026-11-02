@@ -168,8 +168,23 @@ $("btn-pw").addEventListener("click", async () => {
 for (const [id, provider] of [["btn-apple", "apple"], ["btn-google", "google"]]) {
   $(id).addEventListener("click", async () => {
     $("login-err").textContent = "";
-    const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: returnUrl } });
-    if (error) $("login-err").textContent = friendly(error);
+    // 先拿到登入網址但不跳轉：provider 還沒設定好（缺 Secret）時 Supabase 會直接回 400 JSON，
+    // 直接跳過去使用者只會看到一頁黑底文字。先用 fetch 探一下，是轉址才真的跳。
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider, options: { redirectTo: returnUrl, skipBrowserRedirect: true },
+    });
+    if (error) { $("login-err").textContent = friendly(error); return; }
+    try {
+      const probe = await fetch(data.url, { redirect: "manual" });
+      if (probe.type !== "opaqueredirect" && !probe.ok) {
+        const j = await probe.json().catch(() => ({}));
+        $("login-err").textContent = /secret|provider/i.test(j.msg ?? "")
+          ? "這個登入方式還沒開放，請先改用帳號密碼登入。"
+          : friendly({ message: j.msg ?? `登入失敗（${probe.status}）` });
+        return;
+      }
+    } catch { /* 探不到就照常跳轉 */ }
+    location.href = data.url;
   });
 }
 $("switch").addEventListener("click", async (e) => {
