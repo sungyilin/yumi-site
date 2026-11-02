@@ -1,0 +1,57 @@
+name: Android 建置
+
+# 動到 android/ 才跑 —— 跟 iOS 的 testflight.yml 互不干擾
+# （2026-08-31：改動本檔讓 GitHub 重新註冊觸發器，見 testflight.yml）
+on:
+  push:
+    branches: [claude/ios-app-dev-umsa6v, main]
+    paths:
+      - 'android/**'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # 不用 gradle wrapper —— 倉庫裡不放二進位檔，版本釘在這裡
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+
+      - name: 編譯 debug APK
+        run: gradle :app:assembleDebug --no-daemon
+
+      - name: 上傳 APK（給 Android 手機下載安裝測試）
+        uses: actions/upload-artifact@v4
+        with:
+          name: yumi-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      # R8 版：跟正式版一樣縮小＋混淆，但用 debug 金鑰簽，可以直接裝來測
+      # 混淆有沒有弄壞哪個畫面（序列化、登入、掃碼、推播）
+      - name: 編譯 staging APK（經過 R8）
+        run: gradle :app:assembleStaging --no-daemon
+
+      - name: 上傳 staging APK（測 R8 用）
+        uses: actions/upload-artifact@v4
+        with:
+          name: yumi-staging-apk
+          path: android/app/build/outputs/apk/staging/app-staging.apk
+
+      - name: 上傳 R8 對照表（之後看閃退堆疊要用）
+        uses: actions/upload-artifact@v4
+        with:
+          name: yumi-staging-mapping
+          path: android/app/build/outputs/mapping/staging/mapping.txt
+          if-no-files-found: warn
