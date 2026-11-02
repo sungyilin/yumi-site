@@ -1,57 +1,199 @@
-name: Android 建置
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yumi · 授權 AI 助理</title>
+<link rel="stylesheet" href="../style.css">
+<style>
+  /* 這一頁是 Supabase OAuth 2.1 Server 的「同意頁」：
+     使用者在 Claude／ChatGPT 加入 Yumi 連接器時，會被帶到這裡登入並按「允許」。
+     見 supabase/functions/mcp/README.md。 */
+  main{max-width:460px}
+  .logo{width:56px;height:56px;border-radius:50%;background:var(--lime);
+        display:flex;align-items:center;justify-content:center;
+        font-weight:800;font-size:20px;color:#14242D;margin-bottom:18px}
+  .btn{display:block;width:100%;padding:13px 16px;border-radius:12px;border:1px solid var(--line);
+       background:var(--card);color:var(--ink);font-size:16px;font-weight:600;cursor:pointer;
+       margin-top:10px;text-align:center;font-family:inherit}
+  .btn.primary{background:var(--lime);border-color:var(--lime);color:#14242D}
+  .btn:disabled{opacity:.5;cursor:default}
+  .field{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);
+         background:var(--bg);color:var(--ink);font-size:16px;margin-top:10px;font-family:inherit}
+  .row{display:flex;gap:10px}
+  .row .btn{margin-top:14px}
+  .err{color:#C2410C;font-size:14px;margin-top:12px;white-space:pre-wrap}
+  .who{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .who a{font-size:14px}
+  .hide{display:none}
+  .scopes li{font-size:15px}
+</style>
+</head>
+<body>
+<main>
+  <div class="logo">Yumi</div>
 
-# 動到 android/ 才跑 —— 跟 iOS 的 testflight.yml 互不干擾
-# （2026-08-31：改動本檔讓 GitHub 重新註冊觸發器，見 testflight.yml）
-on:
-  push:
-    branches: [claude/ios-app-dev-umsa6v, main]
-    paths:
-      - 'android/**'
-      - '.github/workflows/android.yml'
-  workflow_dispatch:
+  <!-- 載入中 -->
+  <section id="loading">
+    <h1>請稍候…</h1>
+    <p class="soft">正在確認授權請求。</p>
+  </section>
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: android
-    steps:
-      - uses: actions/checkout@v4
+  <!-- 沒有 authorization_id：不是從 AI 客戶端過來的 -->
+  <section id="noid" class="hide">
+    <h1>這一頁是給 AI 助理用的</h1>
+    <p>要讓 Claude 或 ChatGPT 幫你找球局，請在那邊加入 Yumi 連接器，系統會自動把你帶到這裡。</p>
+    <p class="soft">直接打開這個網址是看不到東西的。</p>
+  </section>
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
+  <!-- 未登入 -->
+  <section id="login" class="hide">
+    <h1>登入 Yumi</h1>
+    <p class="soft">用你在 App 裡登入的同一個方式，AI 助理才會看到你的分級和報名紀錄。</p>
 
-      # 不用 gradle wrapper —— 倉庫裡不放二進位檔，版本釘在這裡
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.11.1'
+    <div class="card">
+      <p style="font-weight:600;margin-bottom:4px">帳號密碼登入</p>
+      <input id="acct" class="field" placeholder="帳號" autocomplete="username" autocapitalize="none">
+      <input id="pw" class="field" type="password" placeholder="密碼" autocomplete="current-password">
+      <button id="btn-pw" class="btn primary">登入</button>
+    </div>
 
-      - name: 編譯 debug APK
-        run: gradle :app:assembleDebug --no-daemon
+    <button id="btn-apple" class="btn"> 使用 Apple 登入</button>
+    <button id="btn-google" class="btn">使用 Google 登入</button>
+    <p id="login-err" class="err"></p>
+  </section>
 
-      - name: 上傳 APK（給 Android 手機下載安裝測試）
-        uses: actions/upload-artifact@v4
-        with:
-          name: yumi-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+  <!-- 已登入：顯示同意畫面 -->
+  <section id="consent" class="hide">
+    <h1 id="title">允許 AI 助理使用你的 Yumi？</h1>
+    <div class="card who">
+      <div>
+        <div class="soft">目前登入</div>
+        <div id="me" style="font-weight:600"></div>
+      </div>
+      <a href="#" id="switch">換帳號</a>
+    </div>
+    <div class="card">
+      <p><strong id="client">這個 AI 助理</strong> 想要以你的身分：</p>
+      <ul class="scopes">
+        <li>查看你的分級、城市與報名紀錄</li>
+        <li>幫你搜尋球局、查看名單</li>
+        <li>在你明確同意後，替你報名、候補或退出球局</li>
+      </ul>
+      <ul id="scope-list" class="scopes soft"></ul>
+      <p class="soft">它不能改你的個人資料、不能幫你開團、也看不到你的密碼。你隨時可以在 Claude／ChatGPT 的連接器設定裡移除。</p>
+    </div>
+    <div class="row">
+      <button id="btn-deny" class="btn">拒絕</button>
+      <button id="btn-approve" class="btn primary">允許</button>
+    </div>
+    <p id="consent-err" class="err"></p>
+  </section>
 
-      # R8 版：跟正式版一樣縮小＋混淆，但用 debug 金鑰簽，可以直接裝來測
-      # 混淆有沒有弄壞哪個畫面（序列化、登入、掃碼、推播）
-      - name: 編譯 staging APK（經過 R8）
-        run: gradle :app:assembleStaging --no-daemon
+  <p class="soft" style="margin-top:32px">有問題？<a href="../support.html">聯絡 Yumi</a> · <a href="../privacy.html">隱私權政策</a></p>
+</main>
 
-      - name: 上傳 staging APK（測 R8 用）
-        uses: actions/upload-artifact@v4
-        with:
-          name: yumi-staging-apk
-          path: android/app/build/outputs/apk/staging/app-staging.apk
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-      - name: 上傳 R8 對照表（之後看閃退堆疊要用）
-        uses: actions/upload-artifact@v4
-        with:
-          name: yumi-staging-mapping
-          path: android/app/build/outputs/mapping/staging/mapping.txt
-          if-no-files-found: warn
+// 跟 App 一樣的專案與公開金鑰（publishable key 本來就是公開的）
+const SUPABASE_URL = "https://hpceshqjqcgooosjyhdx.supabase.co";
+const PUBLISHABLE_KEY = "sb_publishable_k4m6uMnNeccAKKEfA_mn0A_lIkRUryA";
+// Android 帳號密碼登入用的假信箱網域（見 android SignInScreen.kt）
+const ACCOUNT_DOMAIN = "id.yumi.influenceai.tw";
+
+const supabase = createClient(SUPABASE_URL, PUBLISHABLE_KEY);
+const $ = (id) => document.getElementById(id);
+const show = (id) => {
+  for (const s of ["loading", "noid", "login", "consent"]) $(s).classList.toggle("hide", s !== id);
+};
+
+const params = new URLSearchParams(location.search);
+const authorizationId = params.get("authorization_id");
+// 回到這一頁時要保留 authorization_id（Google／Apple 登入會離開再回來）
+const returnUrl = `${location.origin}${location.pathname}?authorization_id=${encodeURIComponent(authorizationId ?? "")}`;
+
+const SCOPE_NAMES = { email: "你的 Email", profile: "基本資料（名字、頭像）", openid: "身分識別", phone: "電話" };
+
+function friendly(err) {
+  const m = err?.message ?? String(err);
+  if (/Invalid login credentials/i.test(m)) return "帳號或密碼不正確";
+  if (/rate limit/i.test(m)) return "嘗試太多次，請稍等一下再試";
+  if (/provider is not enabled/i.test(m)) return "這個登入方式還沒開放，請改用其他方式";
+  return m;
+}
+
+async function main() {
+  if (!authorizationId) { show("noid"); return; }
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { show("login"); return; }
+
+  const { data, error } = await supabase.auth.oauth.getAuthorizationDetails(authorizationId);
+  if (error) {
+    show("consent");
+    $("consent-err").textContent = "讀不到授權請求：" + friendly(error) + "\n請回到 AI 助理重新加入連接器。";
+    $("btn-approve").disabled = true; $("btn-deny").disabled = true;
+    return;
+  }
+  // 之前已經同意過 → Supabase 直接給回去的網址
+  if (!("authorization_id" in data)) { location.href = data.redirect_url; return; }
+
+  const name = data.client?.name ?? data.client?.client_name ?? data.client_name ?? "這個 AI 助理";
+  $("client").textContent = name;
+  $("title").textContent = `允許 ${name} 使用你的 Yumi？`;
+  const scopes = (data.scope ?? "").split(" ").filter(Boolean);
+  $("scope-list").innerHTML = scopes.map((s) => `<li>分享 ${SCOPE_NAMES[s] ?? s}</li>`).join("");
+
+  const u = session.user;
+  const email = u.email ?? "";
+  const label = email.endsWith("@" + ACCOUNT_DOMAIN) ? "帳號 " + email.split("@")[0] : (email || u.id);
+  $("me").textContent = label;
+  show("consent");
+}
+
+// ---- 登入 ----
+$("btn-pw").addEventListener("click", async () => {
+  const acct = $("acct").value.trim(), pw = $("pw").value;
+  if (!acct || !pw) { $("login-err").textContent = "請輸入帳號和密碼"; return; }
+  $("btn-pw").disabled = true; $("login-err").textContent = "";
+  // 使用者在 App 裡填的是「帳號」，Supabase 存的是 帳號@id.yumi.influenceai.tw；
+  // 如果他直接打了完整 email 也接受
+  const email = acct.includes("@") ? acct : `${acct}@${ACCOUNT_DOMAIN}`;
+  const { error } = await supabase.auth.signInWithPassword({ email, password: pw });
+  $("btn-pw").disabled = false;
+  if (error) { $("login-err").textContent = friendly(error); return; }
+  main();
+});
+for (const [id, provider] of [["btn-apple", "apple"], ["btn-google", "google"]]) {
+  $(id).addEventListener("click", async () => {
+    $("login-err").textContent = "";
+    const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: returnUrl } });
+    if (error) $("login-err").textContent = friendly(error);
+  });
+}
+$("switch").addEventListener("click", async (e) => {
+  e.preventDefault();
+  await supabase.auth.signOut();
+  show("login");
+});
+
+// ---- 同意／拒絕 ----
+async function decide(approve) {
+  $("btn-approve").disabled = true; $("btn-deny").disabled = true; $("consent-err").textContent = "";
+  const fn = approve ? "approveAuthorization" : "denyAuthorization";
+  const { data, error } = await supabase.auth.oauth[fn](authorizationId);
+  if (error) {
+    $("consent-err").textContent = friendly(error);
+    $("btn-approve").disabled = false; $("btn-deny").disabled = false;
+    return;
+  }
+  location.href = data.redirect_url;
+}
+$("btn-approve").addEventListener("click", () => decide(true));
+$("btn-deny").addEventListener("click", () => decide(false));
+
+main().catch((e) => { show("consent"); $("consent-err").textContent = friendly(e); });
+</script>
+</body>
+</html>
