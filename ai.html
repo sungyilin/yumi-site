@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yumi × AI 助理 · 用 Claude 或 ChatGPT 找球局</title>
+<meta name="description" content="把 Yumi 連接到 Claude 或 ChatGPT，直接用對話找羽球球局、看名單、報名。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+
+<h1>用 Claude 或 ChatGPT 找球局</h1>
+<p class="updated">Yumi AI 連接器 · 說明文件 · 2026 年 11 月</p>
+
+<p>Yumi 提供官方的 AI 連接器（MCP server）。連上之後，你可以在 Claude 或 ChatGPT 裡直接說
+「幫我找這週末高雄的雙打」「我這週報了哪些球」，AI 會用你自己的 Yumi 帳號查詢，並在你確認後替你報名。</p>
+
+<div class="card">
+<p><strong>它能做什麼</strong></p>
+<ul>
+<li>查看你的分級、城市與打法偏好</li>
+<li>依時間、城市、單雙打、分級、費用、距離搜尋公開球局</li>
+<li>看一場球局的細節與目前名單</li>
+<li>列出你已報名、候補中、自己開的球局</li>
+<li>在你明確確認後，替你報名、候補、退出球局</li>
+</ul>
+<p class="soft">它不能改你的個人資料、不能開團、不能評分、看不到你的密碼。權限跟你在 App 裡一模一樣。</p>
+</div>
+
+<h2>連接器網址</h2>
+<p><code>https://hpceshqjqcgooosjyhdx.supabase.co/functions/v1/mcp</code></p>
+
+<h2>在 Claude 使用</h2>
+<ol>
+<li>Claude（網頁、桌面或手機 App，需 Pro 以上方案）→ Settings → Connectors。</li>
+<li>在 Discover 搜尋「Yumi」並加入；若尚未上架，按 Add custom connector，Name 填 Yumi、URL 貼上面的網址。</li>
+<li>回到對話，按輸入框旁的 + → Connectors → Yumi → Connect，會跳到 Yumi 的登入與同意頁。</li>
+<li>用你在 App 的登入方式（Apple、Google 或帳號密碼）登入，按「允許」。</li>
+<li>直接對 Claude 說：「看一下我的 Yumi 資料」「幫我找明天晚上台北的雙打」。</li>
+</ol>
+
+<h2>在 ChatGPT 使用</h2>
+<ol>
+<li>ChatGPT → Settings → Apps &amp; Connectors，搜尋「Yumi」並連接；若尚未上架，開啟 Developer mode 後按 Create，MCP Server URL 貼上面的網址，Authentication 選 OAuth。</li>
+<li>第一次使用時會跳到 Yumi 的登入與同意頁，登入後按「允許」。</li>
+<li>在對話裡提到 Yumi 或球局，ChatGPT 就會使用連接器。</li>
+</ol>
+
+<h2>報名前一定會問你</h2>
+<p>報名、候補、退出都會真的改變你的報名狀態，所以 AI 會先把那一場的時間、場地、費用唸給你，取得你的確認後才會執行。
+報名成功後，開打當天到場讓團長掃描 QR Code 或感應 NFC 立牌報到，跟在 App 裡報名一樣。</p>
+
+<h2>隱私與安全</h2>
+<ul>
+<li>AI 拿到的是你本人的授權憑證，所有查詢與操作都以你的身分進行，資料庫的權限規則與 App 完全相同。</li>
+<li>連接器不儲存你的對話內容，只處理工具呼叫時需要的參數。</li>
+<li>你隨時可以在 Claude／ChatGPT 的連接器設定裡移除授權；移除後 AI 立即無法再存取你的帳號。</li>
+<li>詳見 <a href="privacy.html">隱私權政策</a> 與 <a href="terms.html">使用條款</a>。</li>
+</ul>
+
+<h2>常見問題</h2>
+<table>
+<tr><th>情況</th><th>怎麼辦</th></tr>
+<tr><td>同意頁顯示「這個登入方式還沒開放」</td><td>改用其他登入方式，或在 App 裡用帳號密碼註冊後再試。</td></tr>
+<tr><td>AI 說找不到球局</td><td>預設只找 14 天內、你的分級可報名、還有名額的公開球局；請 AI 放寬時間或城市。</td></tr>
+<tr><td>AI 說 token 無效</td><td>授權過期了，在連接器設定裡重新連接一次。</td></tr>
+<tr><td>想停用</td><td>在 Claude／ChatGPT 的連接器設定裡移除 Yumi。</td></tr>
+</table>
+
+<h2>English summary</h2>
+<p>Yumi is a badminton matchmaking app in Taiwan. This connector lets Claude and ChatGPT search public games by time, city, play type, skill level, fee and distance, show a game's roster, list the games you joined, and, only after you explicitly confirm the time, venue and fee, join, waitlist or leave a game on your behalf. It signs you in with your own Yumi account through OAuth, so the AI never sees more than you can see in the app.</p>
+
+<p class="soft" style="margin-top:32px">有問題？<a href="support.html">聯絡 Yumi</a></p>
+</main>
+</body>
+</html>
